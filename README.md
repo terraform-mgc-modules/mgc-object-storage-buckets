@@ -113,9 +113,6 @@ Este módulo segue as melhores práticas de segurança:
 - ✅ Configuração padrão como bucket privado
 - ✅ Integração com workflows de segurança (Checkov, Trivy, etc.)
 
-## Exemplos Adicionais
-
-Consulte o arquivo `examples.tf` para mais exemplos de configuração.
 
 ## Contribuindo
 

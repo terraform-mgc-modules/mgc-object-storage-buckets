@@ -13,6 +13,11 @@ output "bucket_versioning_enabled" {
   value       = mgc_object_storage_buckets.this.enable_versioning
 }
 
+output "bucket_id" {
+  description = "ID do recurso do bucket"
+  value       = mgc_object_storage_buckets.this.id
+}
+
 # Outputs do data source
 output "bucket_details" {
   description = "Detalhes completos do bucket"
