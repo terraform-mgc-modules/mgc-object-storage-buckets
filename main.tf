@@ -8,6 +8,13 @@ resource "mgc_object_storage_buckets" "this" {
   public_read        = var.public_read
   public_read_write  = var.public_read_write
   recursive          = var.recursive
+
+  lifecycle {
+    precondition {
+      condition     = length([for v in [var.private, var.public_read, var.public_read_write, var.authenticated_read] : v if v]) == 1
+      error_message = "Exactly one of 'private', 'public_read', 'public_read_write', or 'authenticated_read' must be set to true."
+    }
+  }
 }
 
 # Data source para consultar detalhes do bucket criado

@@ -1,12 +1,12 @@
 # Obtendo API Keys da Magalu Cloud
 
-Este guia explica como obter e configurar corretamente as credenciais da Magalu Cloud para usar com este módulo Terraform.
+Este guia explica como obter e configurar corretamente as credenciais da Magalu Cloud para usar com este módulo Terraform de Object Storage Buckets.
 
 ## Pré-requisitos
 
 - Conta ativa na Magalu Cloud
 - MGC CLI instalada ([Guia de instalação](https://docs.magalu.cloud/cli/installation))
-- Permissões adequadas para Container Registry
+- Permissões adequadas para Object Storage
 
 ## Passo a Passo
 
@@ -49,9 +49,9 @@ key_pair_id: <SEU_ID_DO_KEY_PAIR>
 key_pair_secret: <SEU_SECRET_DO_KEY_PAIR>
 name: nataliagranato
 scopes:
-  - container_registry:read
-  - container_registry:write
-  - container_registry:admin
+  - object_storage:read
+  - object_storage:write
+  - object_storage:admin
 created_at: "2025-05-23T10:30:00Z"
 expires_at: "2026-05-23T10:30:00Z"
 ```
@@ -93,6 +93,7 @@ module "object_storage_bucket" {
   
   # A variável TF_VAR_mgc_api_key será usada automaticamente
   bucket_name = "meu-bucket"
+  private     = true
 }
 ```
 
@@ -102,8 +103,9 @@ module "object_storage_bucket" {
 module "object_storage_bucket" {
   source = "github.com/nataliagranato/mgc-object-storage-buckets"
 
-  mgc_api_key             = "<SUA_API_KEY>"
-  bucket_name             = "meu-bucket"
+  mgc_api_key = "<SUA_API_KEY>"
+  bucket_name = "meu-bucket"
+  private     = true
 }
 ```
 
@@ -113,6 +115,8 @@ Crie um arquivo `terraform.tfvars`:
 
 ```hcl
 mgc_api_key = "<SUA_API_KEY>"
+bucket_name = "meu-bucket-exemplo"
+private = true
 ```
 
 ⚠️ **Importante:** Nunca commite o arquivo `terraform.tfvars` com API keys para repositórios públicos!
@@ -166,8 +170,9 @@ export TF_VAR_mgc_api_key="<SUA_API_KEY>"
 # 3. Criar arquivo de variáveis (opcional)
 cat > terraform.tfvars << EOF
 mgc_api_key = "<SUA_API_KEY>"
-container_registry_name = "meu-registry-teste"
-enable_credentials_output = true
+bucket_name = "meu-bucket-teste"
+private = true
+enable_versioning = true
 EOF
 
 # 4. Executar Terraform
@@ -216,8 +221,8 @@ terraform destroy -var-file="terraform.tfvars"
 ### Provisionamento do Exemplo Simples
 
 ```bash
-# Navegar para o exemplo simples
-cd /mgc-object-storage-buckets/examples/simple
+# Navegar para o exemplo simples (se existir)
+cd examples/simple
 
 # Inicializar
 terraform init
@@ -235,28 +240,28 @@ terraform output
 terraform destroy -var-file="terraform.tfvars"
 ```
 
-### Provisionamento do Exemplo Completo (3 Registries)
+### Provisionamento do Exemplo Completo
 
 ```bash
-# Navegar para o exemplo completo
-cd /mgc-object-storage-buckets/examples/complete
+# Navegar para o exemplo completo (se existir)
+cd examples/complete
 
 # Inicializar
 terraform init
 
-# Planejar (mostra criação de 3 registries)
+# Planejar (mostra criação de buckets com diferentes configurações)
 terraform plan -var-file="terraform.tfvars"
 
-# Aplicar (cria dev, prod e monitoring registries)
+# Aplicar (cria buckets com diferentes ACLs)
 terraform apply -var-file="terraform.tfvars"
 
 # Ver todos os outputs detalhados
 terraform output
 
 # Ver output específico
-terraform output registry_details
+terraform output bucket_details
 
-# Destruir todos os 3 registries
+# Destruir todos os buckets
 terraform destroy -var-file="terraform.tfvars"
 ```
 
@@ -278,14 +283,14 @@ terraform show
 terraform state list
 
 # Ver detalhes de um recurso específico
-terraform state show 'mgc_container_registries.main'
+terraform state show 'mgc_object_storage_buckets.this'
 ```
 
 #### Importar Recursos Existentes
 
 ```bash
-# Importar registry existente para o estado
-terraform import mgc_container_registries.main <registry-id>
+# Importar bucket existente para o estado
+terraform import mgc_object_storage_buckets.this <bucket-name>
 ```
 
 #### Gerenciamento de Estado
@@ -298,7 +303,7 @@ cp terraform.tfstate terraform.tfstate.backup
 terraform refresh
 
 # Mover recurso no estado
-terraform state mv 'mgc_container_registries.old' 'mgc_container_registries.new'
+terraform state mv 'mgc_object_storage_buckets.old' 'mgc_object_storage_buckets.new'
 ```
 
 ## Criação de Nova API Key (Opcional)
@@ -309,17 +314,17 @@ Se você preferir criar uma API key específica para Terraform:
 
 ```bash
 mgc auth api-key create \
-  --name "terraform-object-storage-buckets" \
-  --description "API key para automação Terraform do Container Registry"
+  --name "terraform-object-storage" \
+  --description "API key para automação Terraform do Object Storage"
 ```
 
 ### 2. Configurar Permissões
 
 Certifique-se de que a API key tenha as seguintes permissões:
 
-- ✅ `container_registry:read` - Para listar registries, repositórios e imagens
-- ✅ `container_registry:write` - Para criar e modificar registries
-- ✅ `container_registry:admin` - Para gerenciar credenciais (se necessário)
+- ✅ `object_storage:read` - Para listar buckets e objetos
+- ✅ `object_storage:write` - Para criar e modificar buckets
+- ✅ `object_storage:admin` - Para gerenciar configurações avançadas
 
 ### 3. Obter Detalhes da Nova Key
 

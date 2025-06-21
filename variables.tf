@@ -1,6 +1,7 @@
 variable "mgc_api_key" {
   description = "API Key da Magalu Cloud"
   type        = string
+  sensitive   = true
 }
 
 variable "mgc_region" {
