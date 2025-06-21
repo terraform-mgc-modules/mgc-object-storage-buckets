@@ -1,68 +1,130 @@
-# Terraform Secure Template
+# Módulo Terraform - Magalu Cloud Object Storage Buckets
 
-Este repositório é um template para projetos Terraform, com foco em segurança desde o início. Ele integra práticas, ferramentas e automações para garantir a proteção do código, infraestrutura e cadeia de dependências.
+Este módulo Terraform permite criar e gerenciar buckets de object storage na Magalu Cloud de forma simples e segura.
 
 ## Funcionalidades
 
-- **Pipeline CI/CD seguro** com validações automáticas
-- **Análise de segurança de código e dependências**
-- **Política de permissões mínimas no GitHub Actions**
-- **Pronto para uso em novos projetos Terraform**
+- 🪣 **Criação de buckets** com configurações personalizáveis
+- 🔐 **Controle de acesso** com diferentes níveis de permissão
+- 📝 **Versionamento** opcional para controle de versões de objetos
+- 🏷️ **Nomes únicos** com opção de usar prefixo automaticamente
+- 🔍 **Data sources** para consultar informações dos buckets
+- 📊 **Outputs detalhados** com informações do bucket criado
 
-## Workflows e Soluções de Segurança
+## Uso
 
-### 1. Terraform Format, Validate, and Test
-- **Arquivo:** `.github/workflows/terraform.yml`
-- **Função:** Formata, valida e executa testes em código Terraform a cada push ou pull request.
-- **Segurança:** Utiliza o bloco `permissions` para garantir acesso mínimo (`contents: read`).
+### Exemplo Básico
 
-### 2. Checkov Security Scan
-- **Arquivo:** `.github/workflows/checkov.yml`
-- **Função:** Executa o [Checkov](https://www.checkov.io/) para análise estática de segurança em código IaC (Infrastructure as Code), gerando relatórios SARIF.
-- **Segurança:** Detecta más práticas, configurações inseguras e vulnerabilidades em arquivos Terraform.
+```hcl
+module "my_bucket" {
+  source = "./mgc-object-storage-buckets"
+  
+  bucket_name       = "meu-bucket-exemplo"
+  enable_versioning = true
+  private           = true
+}
+```
 
-### 3. Trivy SBOM & Vulnerability Scan
-- **Arquivo:** `.github/workflows/trivy.yml`
-- **Função:** Gera SBOM (Software Bill of Materials) e faz varredura de vulnerabilidades em dependências e imagens, integrando resultados ao GitHub Dependency Graph.
-- **Segurança:** Ajuda a identificar componentes vulneráveis presentes no projeto.
+### Exemplo com Nome como Prefixo
 
-### 4. Scorecard Supply-chain Security
-- **Arquivo:** `.github/workflows/scorecard.yml`
-- **Função:** Usa o [OSSF Scorecard](https://github.com/ossf/scorecard) para avaliar práticas de segurança da cadeia de suprimentos do repositório.
-- **Segurança:** Analisa branch protection, dependabot, workflows, tokens, entre outros.
+```hcl
+module "unique_bucket" {
+  source = "./mgc-object-storage-buckets"
+  
+  bucket_name      = "meu-prefixo"
+  bucket_is_prefix = true
+  enable_versioning = true
+}
+```
 
-### 5. OSV-Scanner
-- **Arquivo:** `.github/workflows/osv-scanner.yml`
-- **Função:** Executa o [OSV-Scanner](https://osv.dev/) para identificar vulnerabilidades conhecidas em dependências.
-- **Segurança:** Automatiza a checagem contínua de vulnerabilidades em bibliotecas e módulos.
+### Exemplo de Bucket Público
 
-### 6. Dependency Review
-- **Arquivo:** `.github/workflows/dependency-review.yml`
-- **Função:** Bloqueia PRs que introduzem dependências vulneráveis conhecidas, usando o GitHub Dependency Review Action.
-- **Segurança:** Garante que novas dependências estejam livres de vulnerabilidades conhecidas.
+```hcl
+module "public_bucket" {
+  source = "./mgc-object-storage-buckets"
+  
+  bucket_name = "bucket-publico"
+  public_read = true
+}
+```
 
-### 7. CodeQL Analysis (opcional)
-- **Arquivo:** (não incluído por padrão)
-- **Função:** Executa análise estática de segurança aprofundada com CodeQL para identificar vulnerabilidades no código.
-- **Segurança:** Detecta padrões de código problemáticos que podem levar a vulnerabilidades, com base em queries mantidas pela comunidade e pelo GitHub.
-- **Observação:** O uso do CodeQL é recomendado e está documentado em [SECURITY.md](SECURITY.md), mas o workflow não está incluído por padrão neste template. Para habilitar, utilize a opção "Configure CodeQL" na aba "Security" do GitHub ou adicione manualmente o workflow sugerido pela plataforma.
+## Variáveis de Entrada
 
-## Outras Práticas de Segurança
+| Nome                 | Descrição                                                 | Tipo     | Padrão     | Obrigatório |
+| -------------------- | --------------------------------------------------------- | -------- | ---------- | ----------- |
+| `mgc_api_key`        | API Key da Magalu Cloud                                   | `string` | -          | ✅           |
+| `mgc_region`         | Região da Magalu Cloud                                    | `string` | `"br-se1"` | ❌           |
+| `bucket_name`        | Nome do bucket a ser criado                               | `string` | -          | ✅           |
+| `bucket_is_prefix`   | Usar nome como prefixo para gerar nome único              | `bool`   | `false`    | ❌           |
+| `enable_versioning`  | Habilitar versionamento                                   | `bool`   | `false`    | ❌           |
+| `authenticated_read` | Acesso de leitura para usuários autenticados              | `bool`   | `false`    | ❌           |
+| `aws_exec_read`      | Habilitar aws_exec_read                                   | `bool`   | `false`    | ❌           |
+| `private`            | Bucket privado (apenas proprietário e usuários delegados) | `bool`   | `true`     | ❌           |
+| `public_read`        | Acesso público de leitura                                 | `bool`   | `false`    | ❌           |
+| `public_read_write`  | Acesso público de leitura e escrita                       | `bool`   | `false`    | ❌           |
+| `recursive`          | Deletar bucket incluindo objetos internos                 | `bool`   | `false`    | ❌           |
 
-- **Dependabot:** Atualizações automáticas de dependências.
-- **Política de Segurança:** Veja [SECURITY.md](SECURITY.md) para detalhes sobre reporte de vulnerabilidades e práticas adotadas.
-- **Code of Conduct:** Ambiente colaborativo e respeitoso ([CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)).
+## Outputs
 
-## Como usar este template
+| Nome                        | Descrição                                              |
+| --------------------------- | ------------------------------------------------------ |
+| `bucket_name`               | Nome do bucket criado                                  |
+| `bucket_final_name`         | Nome final do bucket (com prefixo/sufixo se aplicável) |
+| `bucket_versioning_enabled` | Status do versionamento                                |
+| `bucket_id`                 | ID do recurso do bucket                                |
+| `bucket_details`            | Detalhes completos do bucket                           |
+| `bucket_versioning_status`  | Status detalhado do versionamento                      |
+| `bucket_access_policy`      | Política de acesso do bucket                           |
 
-1. Clique em `Use this template` no GitHub.
-2. Siga as instruções para criar seu novo repositório.
-3. Adapte os workflows conforme as necessidades do seu projeto.
+## Configuração de ACL
 
-## Contato
+⚠️ **Importante:** Apenas uma das opções de ACL deve ser definida como `true`:
 
-Para dúvidas ou reporte de vulnerabilidades, consulte o [SECURITY.md](SECURITY.md).
+- `private` (padrão): Apenas proprietário e usuários delegados têm acesso
+- `public_read`: Acesso público de leitura
+- `public_read_write`: Acesso público de leitura e escrita
+- `authenticated_read`: Usuários autenticados têm acesso de leitura
+
+## Arquivo terraform.tfvars
+
+Crie um arquivo `terraform.tfvars` com suas configurações:
+
+```hcl
+mgc_api_key = "sua-api-key-aqui"
+mgc_region  = "br-se1"
+
+bucket_name       = "meu-bucket"
+enable_versioning = true
+private           = true
+```
+
+## Pré-requisitos
+
+- Terraform >= 1.0
+- Provider MGC >= 0.33.0
+- API Key válida da Magalu Cloud
+
+## Segurança
+
+Este módulo segue as melhores práticas de segurança:
+
+- ✅ API Key é marcada como `sensitive`
+- ✅ Validação de nome de bucket conforme padrões
+- ✅ Configuração padrão como bucket privado
+- ✅ Integração com workflows de segurança (Checkov, Trivy, etc.)
+
+
+## Contribuindo
+
+1. Fork este repositório
+2. Crie uma branch para sua feature
+3. Faça commit das mudanças
+4. Abra um Pull Request
+
+## Licença
+
+Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
 ---
 
-Feito com ❤️ por [Natália Granato](https://github.com/nataliagranato).
+Feito com ❤️ por [Natália Granato](https://github.com/nataliagranato)
