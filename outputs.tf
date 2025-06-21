@@ -14,8 +14,8 @@ output "bucket_versioning_enabled" {
 }
 
 output "bucket_id" {
-  description = "ID do recurso do bucket"
-  value       = mgc_object_storage_buckets.this.id
+  description = "ID/Nome final do bucket (identificador único)"
+  value       = mgc_object_storage_buckets.this.final_name
 }
 
 # Outputs do data source
