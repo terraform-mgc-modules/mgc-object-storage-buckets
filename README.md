@@ -1,7 +1,20 @@
 # Módulo Terraform - Magalu Cloud Object Storage Buckets
 
 Este módulo Terraform permite criar e gerenciar buckets de object storage na Magalu Cloud de forma simples e segura.
+```mermaid
+sequenceDiagram
+    participant User
+    participant Terraform
+    participant MagaluCloudProvider
+    participant MagaluCloudAPI
 
+    User->>Terraform: Define variáveis e executa apply
+    Terraform->>MagaluCloudProvider: Inicializa provider com API Key e região
+    MagaluCloudProvider->>MagaluCloudAPI: Autentica e provisiona bucket
+    MagaluCloudAPI-->>MagaluCloudProvider: Retorna detalhes do bucket criado
+    MagaluCloudProvider-->>Terraform: Exibe outputs e dados do bucket
+    Terraform-->>User: Mostra informações do bucket e outputs
+```
 ## Funcionalidades
 
 - 🪣 **Criação de buckets** com configurações personalizáveis
