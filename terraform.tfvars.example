@@ -1,0 +1,17 @@
+# Exemplo de configuração do terraform.tfvars
+# Descomente e ajuste os valores conforme necessário
+
+mgc_api_key = "xptoxpto-xpto-xpto-xpto-xptoxptoxpto"
+# mgc_region  = "br-se1"
+
+bucket_name = "meu-bucket"
+# bucket_is_prefix  = false
+enable_versioning = true
+
+# Configurações de ACL (apenas uma deve ser true)
+private = true # padrão
+# public_read       = false
+# public_read_write = false
+# authenticated_read = false
+
+# recursive = false  # Para deletar bucket com objetos internos
